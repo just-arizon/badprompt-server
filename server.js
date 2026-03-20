@@ -11,11 +11,21 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
-const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5173";
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://bad-prompt.vercel.app",
+];
+
 app.use(cors({
-  origin: allowedOrigin,
-  methods: ["POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use("/api/analyze-prompt", analyzePromptRouter);
